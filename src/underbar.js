@@ -104,6 +104,30 @@
 
   // Produce a duplicate-free version of the array.
   _.uniq = function(array, isSorted, iterator) {
+  //initialize array including array[0]
+    var unique = [];
+    var iteratedArr = [];
+    if (!isSorted) {
+      array.sort(function(a, b) { return a - b; });
+    }
+    if (iterator) {
+      iteratedArr = _.map(array, function(element) {
+        return iterator(element); //T,F,F,F,F -> check if iterated value is unique -> if so, push element to unique arr
+      });
+      _.each(array, function(element, index, array) {  //[1,2,2,3,3]
+        if (iteratedArr.slice(0, index).indexOf(iterator(element)) === -1) { //[t,f, f, f]
+          unique.push(array[index]); //[1]
+        }
+      });
+    } else {
+      _.each(array, function(element) {
+
+        if (unique.indexOf(element) === -1) {
+          unique.push(element);
+        }
+      });
+    }
+    return unique;
   };
 
 
@@ -158,22 +182,15 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
-    // if (accumulator === undefined) {
-
-    //   //i += 1;
-    // }
-    //accumulator = accumulator || collection[0];
-    _.each(collection, function(element, index, collection) {
-      if (accumulator === undefined) {
-        accumulator = iterator(collection[0], collection[index + 1]);
-      }
-      accumulator = iterator(accumulator, element);
+    var excludeFirst = collection;
+    if (accumulator === undefined) {
+      accumulator = collection[0];
+      excludeFirst = excludeFirst.slice(1);  
+    }
+    _.each(excludeFirst, function(element, index, collection) { // 3, 2, 1
+      accumulator = iterator(accumulator, element, index, collection);
     });
-    //iterate through collection
-    //update accumulator using iterator(collection[i])
-    //return value
     return accumulator;
-
   };
 
   // Determine if the array or object contains a given value (using `===`).
